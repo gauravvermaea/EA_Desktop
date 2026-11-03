@@ -1,0 +1,13 @@
+{
+  "modelId": "5dd7a6dd-7fa5-51af-b6ce-64e67311c020",
+  "name": "Sample",
+  "parentModelId": null,
+  "files": {
+    "core": "EA_Core.xlsm",
+    "entities": "EA_Entities.xlsm",
+    "reports": "EA_Reports.xlsx"
+  },
+  "schemaVersion": 1,
+  "lastSync": null,
+  "baseSnapshot": null
+}

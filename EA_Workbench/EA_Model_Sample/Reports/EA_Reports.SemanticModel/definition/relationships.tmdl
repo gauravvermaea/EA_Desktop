@@ -1,0 +1,15 @@
+relationship 0e1f073f-de93-52d6-9bd4-98379fd97bda
+	fromColumn: 'EntityAttribute'.'Entity ID'
+	toColumn: 'Entity'.'Entity ID'
+
+relationship a0d07827-06a6-531d-8985-bb2bd4069e3f
+	fromColumn: 'Entity'.'TypeCode'
+	toColumn: 'EntityType'.'TypeCode'
+
+relationship 200bf2fe-c04d-56c5-82df-f735677a48ff
+	fromColumn: 'Relationships'.'SourceID'
+	toColumn: 'Entity'.'Entity ID'
+
+relationship 6227a040-32cd-5f31-875f-7e9461e2b811
+	fromColumn: 'Relationships'.'TargetID'
+	toColumn: 'Target Entity'.'Target ID'

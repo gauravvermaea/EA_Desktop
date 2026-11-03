@@ -1,0 +1,42 @@
+table 'EntityAttribute'
+	lineageTag: 54a95409-fc57-55a6-803e-0fdf11946562
+
+	column 'Entity ID'
+		dataType: string
+		lineageTag: b1bf5f01-8d83-5427-ad13-7108f85b4011
+		summarizeBy: none
+		sourceColumn: Entity ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Attribute'
+		dataType: string
+		lineageTag: 9eb2277c-5b33-5c6b-879e-2c41cd24ffe8
+		summarizeBy: none
+		sourceColumn: Attribute
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Value'
+		dataType: string
+		lineageTag: 8b95b2c3-6f9f-51ff-b09a-471797297104
+		summarizeBy: none
+		sourceColumn: Value
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'EntityAttribute' = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents(ModelFolder & "EA_Core.xlsm"), null, true),
+				    Master = Source{[Item="tblMaster",Kind="Table"]}[Data],
+				    Rows = Table.SelectRows(Master, each [Entity ID] <> null and [Entity ID] <> ""),
+				    System = {"Entity ID", "Type", "Display ID", "Name", "Description", "Status", "Repository Area", "Created", "Created By", "Modified", "Modified By", "Row Hash"},
+				    Long = Table.UnpivotOtherColumns(Rows, System, "Attribute", "Value"),
+				    AsText = Table.TransformColumns(Long, {{"Value", each if _ is date or _ is datetime then Date.ToText(Date.From(_), "yyyy-MM-dd") else Text.From(_), type text}}),
+				    Result = Table.TransformColumnTypes(Table.SelectColumns(AsText, {"Entity ID", "Attribute", "Value"}), {{"Entity ID", type text}, {"Attribute", type text}})
+				in
+				    Result
+
+	annotation PBI_ResultType = Table

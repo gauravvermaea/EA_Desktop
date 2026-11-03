@@ -1,0 +1,68 @@
+table 'Target Entity'
+	lineageTag: 59051acd-c66d-5c09-92ca-5c49c4ee6b6c
+
+	column 'Target ID'
+		dataType: string
+		lineageTag: 51aea646-65e1-5f6f-8ebf-897b01851440
+		summarizeBy: none
+		sourceColumn: Target ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Target Display ID'
+		dataType: string
+		lineageTag: 7118d1fc-03a5-5ebe-9378-942a119a9bd8
+		summarizeBy: none
+		sourceColumn: Target Display ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Target Name'
+		dataType: string
+		lineageTag: f414f58e-a04d-50b0-8c73-5730adc497e9
+		summarizeBy: none
+		sourceColumn: Target Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Target Status'
+		dataType: string
+		lineageTag: 5c0c0db1-478e-535d-865a-b559ba7feb76
+		summarizeBy: none
+		sourceColumn: Target Status
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Target Type Name'
+		dataType: string
+		lineageTag: e66500e5-6dc5-5608-b599-a78491b66c86
+		summarizeBy: none
+		sourceColumn: Target Type Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Target Domain'
+		dataType: string
+		lineageTag: 7d720fbe-5ca3-5d64-9c2d-32f7cc9f369e
+		summarizeBy: none
+		sourceColumn: Target Domain
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Target Entity' = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents(ModelFolder & "EA_Core.xlsm"), null, true),
+				    Master = Source{[Item="tblMaster",Kind="Table"]}[Data],
+				    Rows = Table.SelectRows(Master, each [Entity ID] <> null and [Entity ID] <> ""),
+				    Types = Table.SelectColumns(Source{[Item="tblEntityTypes",Kind="Table"]}[Data], {"TypeCode", "Name", "Domain"}),
+				    Joined = Table.NestedJoin(Rows, {"Type"}, Types, {"TypeCode"}, "T", JoinKind.LeftOuter),
+				    Expanded = Table.ExpandTableColumn(Joined, "T", {"Name", "Domain"}, {"Target Type Name", "Target Domain"}),
+				    Picked = Table.SelectColumns(Expanded, {"Entity ID", "Display ID", "Name", "Status", "Target Type Name", "Target Domain"}),
+				    Renamed = Table.RenameColumns(Picked, {{"Entity ID", "Target ID"}, {"Display ID", "Target Display ID"}, {"Name", "Target Name"}, {"Status", "Target Status"}}),
+				    Typed = Table.TransformColumnTypes(Renamed, {{"Target ID", type text}, {"Target Display ID", type text}, {"Target Name", type text}, {"Target Status", type text}, {"Target Type Name", type text}, {"Target Domain", type text}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

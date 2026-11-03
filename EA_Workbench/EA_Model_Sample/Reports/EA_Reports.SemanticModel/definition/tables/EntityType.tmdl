@@ -1,0 +1,48 @@
+table 'EntityType'
+	lineageTag: ff505e1e-121c-5e04-8609-b8cc6fb1cc92
+
+	column 'TypeCode'
+		dataType: string
+		lineageTag: 36f9129e-0d49-5bea-8d84-cb2b3cd3b3fa
+		summarizeBy: none
+		sourceColumn: TypeCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Type Name'
+		dataType: string
+		lineageTag: c878d3d1-b1cb-5f3b-b7e2-bc454b5ae746
+		summarizeBy: none
+		sourceColumn: Type Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Domain'
+		dataType: string
+		lineageTag: 9eff141a-15fb-539a-ba04-b61944e52627
+		summarizeBy: none
+		sourceColumn: Domain
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Aspect'
+		dataType: string
+		lineageTag: 00e72645-d61e-597d-b86f-68a61cf5d867
+		summarizeBy: none
+		sourceColumn: Aspect
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'EntityType' = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents(ModelFolder & "EA_Core.xlsm"), null, true),
+				    Types = Source{[Item="tblEntityTypes",Kind="Table"]}[Data],
+				    Picked = Table.SelectColumns(Types, {"TypeCode", "Name", "Domain", "Aspect"}),
+				    Renamed = Table.RenameColumns(Picked, {{"Name", "Type Name"}}),
+				    Typed = Table.TransformColumnTypes(Renamed, {{"TypeCode", type text}, {"Type Name", type text}, {"Domain", type text}, {"Aspect", type text}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

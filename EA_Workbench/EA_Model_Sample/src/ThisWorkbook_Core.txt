@@ -1,0 +1,26 @@
+Option Explicit
+' EA_Core workbook events (installed by modInstall)
+
+Private Sub Workbook_Open()
+    modCore.StartupCore
+End Sub
+
+Private Sub Workbook_BeforeSave(ByVal SaveAsUI As Boolean, Cancel As Boolean)
+    modSync.CoreBeforeSave
+End Sub
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    Dim wbE As Workbook
+    Set wbE = modCore.EntitiesWB(False)
+    If Not wbE Is Nothing Then
+        If modEvents.PendingCount() > 0 Then
+            If MsgBox("EA_Entities has edits that have not been saved to EA_Core yet. Save EA_Entities now?", _
+                      vbYesNo + vbQuestion, "EA Workbench") = vbYes Then wbE.Save
+        End If
+    End If
+    ' cancel scheduled work so Excel does not reopen this workbook to run it
+    On Error Resume Next
+    If modCore.gSyncAt > 0 Then Application.OnTime modCore.gSyncAt, "'" & ThisWorkbook.Name & "'!modSync.SyncOnOpenFromCore", , False
+    If modSync.gCloseAt > 0 Then Application.OnTime modSync.gCloseAt, "'" & ThisWorkbook.Name & "'!modSync.CloseCoreIfAlone", , False
+    modCore.RemoveContextMenu       ' put back by modCore.Heal if the close is cancelled
+End Sub

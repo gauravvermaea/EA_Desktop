@@ -1,0 +1,10 @@
+Option Explicit
+' EA_Entities workbook events (installed by modInstall)
+
+Private Sub Workbook_Open()
+    modEntitiesThin.ConnectCore
+End Sub
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    modEntitiesThin.Closing
+End Sub

@@ -1,0 +1,104 @@
+table 'Issues'
+	lineageTag: d9629de4-debd-58c9-a52c-449e86a27686
+
+	measure 'Errors' = CALCULATE(COUNTROWS(Issues), Issues[Severity] = "Error")
+		formatString: 0
+		lineageTag: f7533404-3b00-569d-88b2-6bea479be59b
+
+	measure 'Warnings' = CALCULATE(COUNTROWS(Issues), Issues[Severity] = "Warning")
+		formatString: 0
+		lineageTag: ce3f4a92-23d3-50cf-b4d1-5be340943db4
+
+	column 'Found'
+		dataType: string
+		lineageTag: 883869a9-b387-5a01-b83b-0a7ac40055f0
+		summarizeBy: none
+		sourceColumn: Found
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Sheet'
+		dataType: string
+		lineageTag: 1bf1a5ab-5938-5e4b-8bf9-89a71cd57e0d
+		summarizeBy: none
+		sourceColumn: Sheet
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'RecordID'
+		dataType: string
+		lineageTag: 112b3a6d-8a93-550a-ac88-7ea5c8d73b11
+		summarizeBy: none
+		sourceColumn: RecordID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DisplayID'
+		dataType: string
+		lineageTag: e3ab05fa-0f1d-5556-986c-eac0c8030e48
+		summarizeBy: none
+		sourceColumn: DisplayID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Name'
+		dataType: string
+		lineageTag: 48bda689-947f-5b85-8377-9161cf9cb741
+		summarizeBy: none
+		sourceColumn: Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'TypeCode'
+		dataType: string
+		lineageTag: 9ae0623a-d237-541b-b9bc-646f7a53508b
+		summarizeBy: none
+		sourceColumn: TypeCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'AttrCode'
+		dataType: string
+		lineageTag: 787b2d49-e6e6-5d47-b217-0102a154d619
+		summarizeBy: none
+		sourceColumn: AttrCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'RuleType'
+		dataType: string
+		lineageTag: 1f4b3cd9-3e1f-500c-a72d-8e3e76edb594
+		summarizeBy: none
+		sourceColumn: RuleType
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Severity'
+		dataType: string
+		lineageTag: 39b29410-d4f0-57e3-978a-7f100caec484
+		summarizeBy: none
+		sourceColumn: Severity
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Message'
+		dataType: string
+		lineageTag: 1385b213-cf2d-5996-b536-930b6cc7862a
+		summarizeBy: none
+		sourceColumn: Message
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Issues' = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents(ModelFolder & "EA_Core.xlsm"), null, true),
+				    Issues = Source{[Item="tblIssues",Kind="Table"]}[Data],
+				    Rows = Table.SelectRows(Issues, each [Severity] <> null and [Severity] <> ""),
+				    Picked = Table.SelectColumns(Rows, {"Found", "Sheet", "RecordID", "DisplayID", "Name", "TypeCode", "AttrCode", "RuleType", "Severity", "Message"}),
+				    Typed = Table.TransformColumnTypes(Picked, {{"Found", type text}, {"Sheet", type text}, {"RecordID", type text}, {"DisplayID", type text}, {"Name", type text}, {"TypeCode", type text}, {"AttrCode", type text}, {"RuleType", type text}, {"Severity", type text}, {"Message", type text}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

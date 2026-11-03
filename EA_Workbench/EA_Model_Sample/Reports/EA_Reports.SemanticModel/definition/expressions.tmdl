@@ -1,0 +1,4 @@
+expression ModelFolder = "C:\Users\gaura\Enterprise_Architecture\Projects\EA_Workbench\EA_Model_Sample\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 4c68a3bd-9c40-5911-801b-ba927b18ddf3
+
+	annotation PBI_ResultType = Text

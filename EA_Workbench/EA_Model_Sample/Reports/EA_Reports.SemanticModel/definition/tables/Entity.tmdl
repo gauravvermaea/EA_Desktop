@@ -1,0 +1,93 @@
+table 'Entity'
+	lineageTag: 7a2cb1ea-0e1d-5511-9c3d-78b024f1dff9
+
+	measure 'Entities' = COUNTROWS('Entity')
+		formatString: 0
+		lineageTag: 45aa85f5-7b85-5292-af5a-b841af969012
+
+	measure 'Retired entities' = CALCULATE(COUNTROWS('Entity'), 'Entity'[Status] = "Retired")
+		formatString: 0
+		lineageTag: d04fbd8f-77bc-517f-a897-37b8035ad919
+
+	measure 'Data quality %' = 1 - DIVIDE(CALCULATE(DISTINCTCOUNT(Issues[RecordID]), Issues[Severity] = "Error", Issues[Sheet] = "DATA_Master"), COUNTROWS('Entity'), 0)
+		formatString: 0%
+		lineageTag: d6f54e22-db41-5c25-9532-2bda24003442
+
+	column 'Entity ID'
+		dataType: string
+		lineageTag: 29fe2928-e454-5aeb-a799-4682c805510d
+		summarizeBy: none
+		sourceColumn: Entity ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Display ID'
+		dataType: string
+		lineageTag: 97420731-7964-5ff7-b63f-977adf3b0e64
+		summarizeBy: none
+		sourceColumn: Display ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Name'
+		dataType: string
+		lineageTag: e083bd89-c0d3-5c3f-a870-933f18d6aede
+		summarizeBy: none
+		sourceColumn: Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Description'
+		dataType: string
+		lineageTag: fa50b842-0b81-556b-8e6a-79f1da13adb9
+		summarizeBy: none
+		sourceColumn: Description
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Status'
+		dataType: string
+		lineageTag: 37a3405f-0fcf-5dee-9389-1f43ee0ea423
+		summarizeBy: none
+		sourceColumn: Status
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Repository Area'
+		dataType: string
+		lineageTag: b31eee48-a503-5f50-867e-aaf45f426c61
+		summarizeBy: none
+		sourceColumn: Repository Area
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'TypeCode'
+		dataType: string
+		lineageTag: e4749b27-420f-52df-8a3f-e1adddf5eeb2
+		summarizeBy: none
+		sourceColumn: TypeCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Modified'
+		dataType: string
+		lineageTag: ff6a515e-ecb6-5348-a5c9-26e4b79e5ae7
+		summarizeBy: none
+		sourceColumn: Modified
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Entity' = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents(ModelFolder & "EA_Core.xlsm"), null, true),
+				    Master = Source{[Item="tblMaster",Kind="Table"]}[Data],
+				    Rows = Table.SelectRows(Master, each [Entity ID] <> null and [Entity ID] <> ""),
+				    Picked = Table.SelectColumns(Rows, {"Entity ID", "Display ID", "Name", "Description", "Status", "Repository Area", "Type", "Modified"}),
+				    Renamed = Table.RenameColumns(Picked, {{"Type", "TypeCode"}}),
+				    Typed = Table.TransformColumnTypes(Renamed, {{"Entity ID", type text}, {"Display ID", type text}, {"Name", type text}, {"Description", type text}, {"Status", type text}, {"Repository Area", type text}, {"TypeCode", type text}, {"Modified", type text}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

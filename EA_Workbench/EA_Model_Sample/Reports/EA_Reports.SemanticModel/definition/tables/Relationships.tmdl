@@ -1,0 +1,78 @@
+table 'Relationships'
+	lineageTag: 2cf6ad10-12c5-5f89-977e-615db14d0a84
+
+	measure 'Relationship count' = COUNTROWS('Relationships')
+		formatString: 0
+		lineageTag: d8b65c03-14be-5fad-b451-db22144b78ac
+
+	column 'RelID'
+		dataType: string
+		lineageTag: 59d329a3-a85e-5036-bd37-5f623e569131
+		summarizeBy: none
+		sourceColumn: RelID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'RelCode'
+		dataType: string
+		lineageTag: 7fe4a65e-49b8-5e71-b621-0e9d1a7bd4c1
+		summarizeBy: none
+		sourceColumn: RelCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Relationship'
+		dataType: string
+		lineageTag: 05b3b48f-dcc4-5bde-a8bf-2f3c3c1c693a
+		summarizeBy: none
+		sourceColumn: Relationship
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'SourceID'
+		dataType: string
+		lineageTag: 5c786f34-e4bf-541e-a983-79a87d86bce7
+		summarizeBy: none
+		sourceColumn: SourceID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'TargetID'
+		dataType: string
+		lineageTag: 4c7bf91c-265e-5ae0-8e74-a217ee5ec118
+		summarizeBy: none
+		sourceColumn: TargetID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Label'
+		dataType: string
+		lineageTag: e0f404cc-483b-539f-842a-7ab1c83e37c6
+		summarizeBy: none
+		sourceColumn: Label
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Status'
+		dataType: string
+		lineageTag: fa390f6a-eb5e-51d7-8450-9c1ea46c0328
+		summarizeBy: none
+		sourceColumn: Status
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Relationships' = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents(ModelFolder & "EA_Core.xlsm"), null, true),
+				    Rel = Table.SelectRows(Source{[Item="tblRel",Kind="Table"]}[Data], each [RelID] <> null and [RelID] <> ""),
+				    Verbs = Table.SelectColumns(Source{[Item="tblRelTypes",Kind="Table"]}[Data], {"RelCode", "Name"}),
+				    Joined = Table.NestedJoin(Rel, {"RelCode"}, Verbs, {"RelCode"}, "V", JoinKind.LeftOuter),
+				    Expanded = Table.ExpandTableColumn(Joined, "V", {"Name"}, {"Relationship"}),
+				    Picked = Table.SelectColumns(Expanded, {"RelID", "RelCode", "Relationship", "SourceID", "TargetID", "Label", "Status"}),
+				    Typed = Table.TransformColumnTypes(Picked, {{"RelID", type text}, {"RelCode", type text}, {"Relationship", type text}, {"SourceID", type text}, {"TargetID", type text}, {"Label", type text}, {"Status", type text}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
